@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Project Organizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 30px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        h1 {
+            color: #000;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .project-header {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .project-header input {
+            width: 100%;
+            font-size: 24px;
+            font-weight: bold;
+            border: 2px solid transparent;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            background: transparent;
+        }
+        
+        .project-header input:focus {
+            outline: none;
+            border-color: #000;
+            background: white;
+        }
+        
+        .progress-bar {
+            background: #000000;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 15px;
+            border: 2px solid #ccc;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #000;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            min-width: 0;
+        }
+        
+        .progress-fill:empty::after {
+            content: '0% Complete';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffffff;
+        }
+        
+        .add-task-form {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        input, select, button {
+            padding: 12px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #000;
+        }
+        
+        .btn-add {
+            background: #000;
+            color: white;
+            border: 2px solid #000;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn-add:hover {
+            background: #333;
+            border-color: #333;
+            transform: translateY(-2px);
+        }
+        
+        .tasks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .task {
+            display: grid;
+            grid-template-columns: auto 1fr auto auto auto;
+            gap: 15px;
+            align-items: center;
+            padding: 18px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+        
+        .task:hover {
+            border-color: #000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .task.completed {
+            opacity: 0.5;
+            background: #fafafa;
+        }
+        
+        .task.completed .task-name {
+            text-decoration: line-through;
+        }
+        
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #000;
+        }
+        
+        .task-name {
+            font-weight: 500;
+            color: #000;
+        }
+        
+        .task-person {
+            color: #000;
+            font-weight: 600;
+            font-size: 13px;
+            background: #f0f0f0;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+        }
+        
+        .task-date {
+            color: #666;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        
+        .task-date.overdue {
+            color: #000;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        
+        .btn-delete {
+            background: #fff;
+            color: #000;
+            border: 2px solid #ccc;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .btn-delete:hover {
+            background: #000;
+            color: white;
+            border-color: #000;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .add-task-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .task {
+                grid-template-columns: auto 1fr;
+                gap: 10px;
+            }
+            
+            .task-person, .task-date {
+                grid-column: 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Reminder Book</h1>
+        <p class="subtitle">Make sure you do your work!.</p>
+        
+        <div class="project-header">
+            <input 
+                type="text" 
+                id="projectName" 
+                placeholder="Enter your project name..."
+                value="Untitled Project"
+            >
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar">0% Complete</div>
+            </div>
+        </div>
+        
+        <div class="add-task-form">
+            <input type="text" id="taskInput" placeholder="What needs to be done?" required>
+            <input type="text" id="personInput" placeholder="Who's doing it?" required>
+            <input type="date" id="dateInput" required>
+            <button class="btn-add" onclick="addTask()">+ Add Task</button>
+        </div>
+        
+        <div class="tasks-list" id="tasksList">
+            <div class="empty-state">
+                <div class="empty-state-icon">✨</div>
+                <h3>No tasks yet!</h3>
+                <p>Add your first task above to get started.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let tasks = [];
+        let projectName = 'Untitled Project';
+        
+        // Load saved data
+        function loadData() {
+            const saved = localStorage.getItem('groupProjectData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                tasks = data.tasks || [];
+                projectName = data.projectName || 'Untitled Project';
+                document.getElementById('projectName').value = projectName;
+                renderTasks();
+            }
+        }
+        
+        // Save data
+        function saveData() {
+            localStorage.setItem('groupProjectData', JSON.stringify({
+                tasks: tasks,
+                projectName: projectName
+            }));
+        }
+        
+        // Update project name
+        document.getElementById('projectName').addEventListener('input', (e) => {
+            projectName = e.target.value;
+            saveData();
+        });
+        
+        // Set today as minimum date
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('dateInput').min = today;
+        document.getElementById('dateInput').value = today;
+        
+        // Add task
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const personInput = document.getElementById('personInput');
+            const dateInput = document.getElementById('dateInput');
+            
+            if (!taskInput.value || !personInput.value || !dateInput.value) {
+                alert('Please fill in all fields!');
+                return;
+            }
+            
+            tasks.push({
+                id: Date.now(),
+                name: taskInput.value,
+                person: personInput.value,
+                date: dateInput.value,
+                completed: false
+            });
+            
+            taskInput.value = '';
+            personInput.value = '';
+            dateInput.value = today;
+            
+            saveData();
+            renderTasks();
+        }
+        
+        // Toggle task completion
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                saveData();
+                renderTasks();
+            }
+        }
+        
+        // Delete task
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveData();
+            renderTasks();
+        }
+        
+        // Check if date is overdue
+        function isOverdue(dateString) {
+            const taskDate = new Date(dateString);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return taskDate < today;
+        }
+        
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const options = { month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+        
+        // Render tasks
+        function renderTasks() {
+            const tasksList = document.getElementById('tasksList');
+            
+            if (tasks.length === 0) {
+                tasksList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✨</div>
+                        <h3>No tasks yet!</h3>
+                        <p>Add your first task above to get started.</p>
+                    </div>
+                `;
+                updateProgress();
+                return;
+            }
+            
+            tasksList.innerHTML = tasks.map(task => `
+                <div class="task ${task.completed ? 'completed' : ''}">
+                    <input 
+                        type="checkbox" 
+                        class="checkbox" 
+                        ${task.completed ? 'checked' : ''}
+                        onchange="toggleTask(${task.id})"
+                    >
+                    <span class="task-name">${task.name}</span>
+                    <span class="task-person">${task.person}</span>
+                    <span class="task-date ${!task.completed && isOverdue(task.date) ? 'overdue' : ''}">
+                        ${formatDate(task.date)}
+                    </span>
+                    <button class="btn-delete" onclick="deleteTask(${task.id})">Delete</button>
+                </div>
+            `).join('');
+            
+            updateProgress();
+        }
+        
+        // Update progress bar
+        function updateProgress() {
+            const completed = tasks.filter(t => t.completed).length;
+            const total = tasks.length;
+            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = percentage + '%';
+            
+            if (percentage > 0) {
+                progressBar.textContent = percentage + '% Complete';
+            } else {
+                progressBar.textContent = '';
+            }
+        }
+        
+        // Enter key to add task
+        document.getElementById('dateInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTask();
+        });
+        
+        // Load data on start
+        loadData();
+    </script>
+</body>
+</html>
