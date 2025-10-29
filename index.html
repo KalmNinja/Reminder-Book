@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
-    <title>Reminder Book</title>
+    <title>Group Project Organizer</title>
     <style>
         * {
             margin: 0;
@@ -67,7 +66,7 @@
         }
         
         .progress-bar {
-            background: #000000;
+            background: #e0e0e0;
             height: 30px;
             border-radius: 15px;
             overflow: hidden;
@@ -94,7 +93,7 @@
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            color: #ffffff;
+            color: #666;
         }
         
         .add-task-form {
@@ -248,8 +247,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>📚 Reminder Book</h1>
-        <p class="subtitle">Make sure you do your work!.</p>
+        <h1>📚 Group Project Organizer</h1>
+        <p class="subtitle">Keep your team on track. No logins, no fuss.</p>
         
         <div class="project-header">
             <input 
@@ -430,10 +429,53 @@
             if (e.key === 'Enter') addTask();
         });
         
+        // Request notification permission
+        function requestNotificationPermission() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        }
+        
+        // Check for upcoming tasks and send notifications
+        function checkUpcomingTasks() {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                
+                tasks.forEach(task => {
+                    if (task.completed) return;
+                    
+                    const taskDate = new Date(task.date);
+                    taskDate.setHours(0, 0, 0, 0);
+                    
+                    // Notify for tasks due today
+                    if (taskDate.getTime() === today.getTime()) {
+                        new Notification('📚 Task Due TODAY!', {
+                            body: `"${task.name}" assigned to ${task.person}`,
+                            icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>',
+                            tag: 'task-' + task.id
+                        });
+                    }
+                    
+                    // Notify for tasks due tomorrow
+                    if (taskDate.getTime() === tomorrow.getTime()) {
+                        new Notification('⏰ Task Due Tomorrow', {
+                            body: `"${task.name}" assigned to ${task.person}`,
+                            icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⏰</text></svg>',
+                            tag: 'task-' + task.id
+                        });
+                    }
+                });
+            }
+        }
+        
         // Load data on start
         loadData();
+        requestNotificationPermission();
+        checkUpcomingTasks();
     </script>
 </body>
 </html>
-
-
